@@ -1,9 +1,17 @@
-int inLEDPins[] = {1, 2};
-int outLEDPins[] = {3, 4};
-int switchPins[] = {5, 6};
+// Arduino Switch Pins / BB / Resistor to 5V / Switch / Gnd
+// Postive side of Switch pins are pulled up using 10K resistors
+
+// Pins 2-3 are the lights you have to match.
+// Pins 4-5 are the lights you can manipulate with the switch.
+
+
+int inLEDPins[] = {2, 3};
+int outLEDPins[] = {4, 5};
+int switchPins[] = {6, 7};
 int ledsOn[] = {false, false};
 int switchesOn[] = {false, false};
 int totalItems = 2;
+int totalMatches = 0;
 
 void setup()
 {
@@ -22,18 +30,22 @@ void loop()
 {
   readSwitches();
   if ( ledsMatch() ) {
-    Serial.print("Match!");
+    totalMatches++;   
+    Serial.print("Match: ");
+    Serial.println(totalMatches); 
     lightLEDs();
   }
-  Serial.print(digitalRead(switchPins[0]));
-  Serial.println(digitalRead(switchPins[1]));
-  Serial.print(ledsOn);
-  Serial.println(switchesOn);
+//  Serial.print("In: ");
+//  Serial.print(ledsOn[0]);
+//  Serial.println(ledsOn[1]);
+//  Serial.print("Out: ");
+//  Serial.print(switchesOn[0]);
+//  Serial.println(switchesOn[1]);
 
-  delay(1000);  
+  delay(100);  
 }
 
-void readSwitches() {
+void readSwitches() { 
   boolean switchState;
   for (int currentSwitch = 0; currentSwitch < totalItems; currentSwitch++) {
     switchState = digitalRead(switchPins[currentSwitch]);
@@ -53,7 +65,6 @@ boolean ledsMatch() {
 
 void lightLEDs(){
   for (int currentLED = 0; currentLED < totalItems; currentLED++) {
-    digitalWrite(inLEDPins[currentLED], LOW);
     if (OnOffRandomizer() == true) {
       digitalWrite(inLEDPins[currentLED], HIGH);
       ledsOn[currentLED] = true;
