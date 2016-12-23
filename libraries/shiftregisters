@@ -1,0 +1,96 @@
+class shiftRegister {
+  private:
+    int latchPin; // Pin 12 (ST_CP of 74HC595)
+    int clockPin; // Pin 11 (SH_CP of 74HC595)
+    int dataPin;  // Pin 14 (DS of 74HC595)
+    
+    void latchLow() {
+      digitalWrite(latchPin, LOW); 
+    }
+    
+    void latchHigh() {
+      digitalWrite(latchPin, HIGH); 
+    }
+    
+  public:
+    byte registerData; // Byte currently in register.
+    
+    shiftRegister(int latch, int clock, int data) {
+      latchPin = latch;
+      clockPin = clock;
+      dataPin = data;
+      registerData = 00000000;
+    }
+    
+    void setPins(int latch, int clock, int data) {
+      latchPin = latch;
+      clockPin = clock;
+      dataPin = data;    
+    }
+
+    void setupPins() {
+      pinMode(latchPin, OUTPUT);
+      pinMode(clockPin, OUTPUT);
+      pinMode(dataPin, OUTPUT);
+    }
+    
+    void writeRegister(byte value) {
+      latchLow();
+      shiftOut(dataPin, clockPin, MSBFIRST, value);
+      latchHigh();
+      registerData = value;
+    }
+};
+
+class ledSR {
+  private:
+    shiftRegister ledShiftRegister(0, 0, 0);
+    int outputPins = 8;
+
+    boolean LightRandomizer(){
+      if ( (random(0,9) % 2) == 0) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+
+  public:
+    // Constructor, sets up pins for shift register
+	ledSR(int latch, int clock, int data) {
+	  ledShiftRegister.setPins(latch, clock, data);
+	  ledShiftRegister.setupPins();
+	}
+	
+	// Set all LEDs directly
+	void setAllLEDs(byte value) {
+	  ledShiftRegister.writeRegister(value);
+	}
+	
+	// Set one LED in Shift Register by XORing a changeByte onto the existing RegisterData.
+	// Currently it will 'toggle' and ignore provided value, which is fine unless it gets called while the LED already has the desired state.
+	void setOneLED(int position, bool value) {
+	  byte changeByte = 0;
+	  for (int bit = 1; bit > 8; bit++) {
+        changeByte << 1;
+        if (bit == position) {
+          changeByte = changeByte | 1;
+        }
+      }
+      
+	  setAllLEDs(ledShiftRegister.registerData ^ changeByte);
+	}
+	
+	// Sets all LEDs at random
+	void randomizeLED() {
+	  byte randomByte = 0;
+	  for (int currentLED = 1; currentLED <= outputPins; currentLED++) {
+	    randomByte << 1;
+	    if (LightRandomizer() == true) {
+	      randomByte = randomByte | 1;
+        }
+      }
+      setAllLEDs(randomByte);
+    }
+};

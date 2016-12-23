@@ -111,8 +111,32 @@ class shiftRegister {
     }
 };
 
+
+class sevenSegmentDisplay {
+  private:
+    int latchPin; // Pin 12 (ST_CP of 74HC595)
+    int clockPin; // Pin 11 (SH_CP of 74HC595)
+    int dataPin;  // Pin 14 (DS of 74HC595)
+    
+    
+  public:
+    int onesValue;
+    int tensValue;
+    int hundredsValue;
+    int thousandsValue;
+    
+    sevenSegmentDisplay(shiftRegister& srOutput) {
+      srOutput.setLEDsOn();
+    }
+}
+
+
+
+
+
 int ledPins = 16;
-shiftRegister srLEDOutput(6, 7, 5, ledPins);
+shiftRegister srOutput(6, 7, 5, 16);
+sevenSegmentDisplay ssdOutput(srOutput);
 int speed = 500;
 
 
